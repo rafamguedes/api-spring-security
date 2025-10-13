@@ -31,6 +31,10 @@ public class SecurityConfig {
             auth ->
                 auth.requestMatchers(HttpMethod.POST, "/api/v1/users/register")
                     .permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/v1/auth/request-reset-password")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/v1/auth/reset-password")
+                    .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/v1/auth/login")
                     .permitAll()
                     .anyRequest()
