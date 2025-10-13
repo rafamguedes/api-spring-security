@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: demo
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/demo_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:root}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  sql:
+    init:
+      mode: always
+  security:
+    token:
+      secret: ${SECURITY_TOKEN_SECRET:mysecretkey}
+      expiration: ${EXPIRATION_TOKEN:3600000}
+  mail:
+    host: ${SMTP}
+    port: ${SMTP_PORT}}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
