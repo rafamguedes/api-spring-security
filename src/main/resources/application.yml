@@ -22,10 +22,10 @@ spring:
       secret: ${SECURITY_TOKEN_SECRET:mysecretkey}
       expiration: ${EXPIRATION_TOKEN:3600000}
   mail:
-    host: ${SMTP}
-    port: ${SMTP_PORT}}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${MAIL_USERNAME:seu-email@gmail.com}
+    password: ${MAIL_PASSWORD:sua-senha}
     properties:
       mail:
         smtp:

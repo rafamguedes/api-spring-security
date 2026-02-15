@@ -29,13 +29,9 @@ public class SecurityConfig {
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers(HttpMethod.POST, "/api/v1/users/register")
+                auth.requestMatchers(HttpMethod.POST, "/api/v1/users")
                     .permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/v1/auth/request-reset-password")
-                    .permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/v1/auth/reset-password")
-                    .permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/v1/auth/login")
+                    .requestMatchers(HttpMethod.POST, "/api/v1/auth/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated())

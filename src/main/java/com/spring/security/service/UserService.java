@@ -10,30 +10,34 @@ import com.spring.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserService implements UserDetailsService {
+public class UserService {
 
   private final UserRepository userRepository;
   private final ApplicationEventPublisher eventPublisher;
+  private final PasswordEncoder passwordEncoder;
 
+  @Transactional
   public UserResponseDTO create(UserRequestDTO request) {
     validateRequest(request);
 
     var user = toEntity(request);
-    var savedUser = toResponse(userRepository.save(user));
+    var savedUser = userRepository.save(user);
+    var response = toResponse(savedUser);
 
-    // Sending welcome email
-    eventPublisher.publishEvent(new UserEvent(this, savedUser));
+    try {
+      eventPublisher.publishEvent(new UserEvent(this, response));
+    } catch (Exception e) {
+      log.error("Erro ao publicar evento de criação de usuário: {}", e.getMessage());
+    }
 
-    return savedUser;
+    return response;
   }
 
   private void validateRequest(UserRequestDTO request) {
@@ -46,16 +50,16 @@ public class UserService implements UserDetailsService {
     }
   }
 
-  private static User toEntity(UserRequestDTO request) {
+  private User toEntity(UserRequestDTO request) {
     return User.builder()
         .username(request.getUsername())
         .email(request.getEmail())
-        .password(new BCryptPasswordEncoder().encode(request.getPassword()))
+        .password(passwordEncoder.encode(request.getPassword()))
         .role(Role.USER)
         .build();
   }
 
-  private static UserResponseDTO toResponse(User savedUser) {
+  private UserResponseDTO toResponse(User savedUser) {
     return UserResponseDTO.builder()
         .id(savedUser.getId())
         .username(savedUser.getUsername())
@@ -64,13 +68,5 @@ public class UserService implements UserDetailsService {
         .createdAt(savedUser.getCreatedAt())
         .updatedAt(savedUser.getUpdatedAt())
         .build();
-  }
-
-  @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    return userRepository
-        .findByUsername(username)
-        .orElseThrow(
-            () -> new UsernameNotFoundException("User not found by username: " + username));
   }
 }

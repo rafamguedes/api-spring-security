@@ -9,15 +9,31 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.Optional;
 
 public class AuditorAwareUser implements AuditorAware<String> {
+
   @Override
   @NonNull
   public Optional<String> getCurrentAuditor() {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    if (auth == null) {
-      return Optional.of("unknown");
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    if (authentication == null || !authentication.isAuthenticated()) {
+      return Optional.of("SYSTEM");
     }
 
-    User auditor = (User) auth.getPrincipal();
-    return Optional.of(auditor.getEmail());
+    Object principal = authentication.getPrincipal();
+
+    if (principal instanceof String && "anonymousUser".equals(principal)) {
+      return Optional.of("ANONYMOUS");
+    }
+
+    if (principal instanceof User) {
+      User user = (User) principal;
+      return Optional.of(user.getEmail());
+    }
+
+    if (principal instanceof String) {
+      return Optional.of((String) principal);
+    }
+
+    return Optional.of("UNKNOWN");
   }
 }
